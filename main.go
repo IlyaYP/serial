@@ -6,10 +6,19 @@ import (
 	"net/http"
 	"text/template"
 
+	"slices"
+
 	"go.bug.st/serial"
 )
 
 var PORTS []string
+
+var mode = &serial.Mode{
+	BaudRate: 115200,
+	Parity:   serial.EvenParity,
+	DataBits: 7,
+	StopBits: serial.OneStopBit,
+}
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -22,23 +31,22 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// http.ServeFile(w, r, "templates/index.html")
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		log.Fatalf("template parsing: %s", err)
+	log.Printf("port: %v", r.URL.Query().Get("port"))
+
+	if !slices.Contains(PORTS, r.URL.Query().Get("port")) {
+		// http.ServeFile(w, r, "templates/index.html")
+		tmpl, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			log.Fatalf("template parsing: %s", err)
+		}
+
+		err = tmpl.Execute(w, PORTS)
+		if err != nil {
+			log.Fatalf("template execution: %s", err)
+		}
 	}
 
-	mode := &serial.Mode{
-		BaudRate: 115200,
-		Parity:   serial.EvenParity,
-		DataBits: 7,
-		StopBits: serial.OneStopBit,
-	}
-
-	err = tmpl.Execute(w, PORTS)
-	if err != nil {
-		log.Fatalf("template execution: %s", err)
-	}
+	log.Printf("url: %v", r.URL.String())
 
 }
 
@@ -55,7 +63,13 @@ func main() {
 	}
 	PORTS = ports
 
-	http.HandleFunc("/", serveIndex)
-	log.Fatal(http.ListenAndServe(":3001", nil))
+	hub := NewHub()
+	go hub.run()
 
+	http.HandleFunc("/", serveIndex)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(hub, w, r)
+	})
+
+	log.Fatal(http.ListenAndServe(":3001", nil))
 }
