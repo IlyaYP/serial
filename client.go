@@ -13,6 +13,7 @@ import (
 
 type Client struct {
 	id   string
+	port string
 	hub  *Hub
 	conn *websocket.Conn
 	// Buffered channel of outbound messages.
@@ -35,7 +36,7 @@ const (
 	maxMessageSize = 512
 )
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func serveWs(hubs map[string]*Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -45,7 +46,8 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 	id := uuid.New()
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), id: id.String()}
+	client := &Client{hub: hubs["COM1"], port: "COM1", //tmp
+		conn: conn, send: make(chan []byte, 256), id: id.String()}
 	client.hub.register <- client
 
 	go client.writePump()
@@ -81,7 +83,7 @@ func (c *Client) writePump() {
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				w.Write(msg)
+				w.Write(<-c.send)
 			}
 
 			if err := w.Close(); err != nil {
@@ -130,6 +132,6 @@ func (c *Client) readPump() {
 			log.Printf("error: %v", err)
 		}
 
-		c.hub.broadcast <- &Message{ClientID: c.id, Text: msg.Text}
+		c.hub.broadcast <- &Message{Port: c.port, ClientID: c.id, Text: msg.Text}
 	}
 }

@@ -19,13 +19,18 @@
 <body>
   <h1 class="text-3xl text-center p-4">Serial</h1>
 
-<div id="pd">
-  <select name="port" hx-get="/" hx-trigger="change" hx-target="#pd" class="bg-blue-500 text-white px-4 py-2">
-    {{range .}}
-    <option>{{.}}</option>
-    {{end}}
-  </select>
-</div>
+  <div hx-ext="ws" ws-connect="/ws">
+      <div class="flex bg-gray-100 p-4">
+      <ul id="chat_room" hx-swap="beforeend" hx-swap-oob="beforeend">
+      </ul>
+    </div>
+
+    <form id="form" ws-send hx-reset-on-success>
+      <input name="text" type="text" class="border-2 border-gray-300 p-2" placeholder="Type your message"
+        >
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2">Send</button>
+    </form>
+  </div>
 </body>
 
 </html>

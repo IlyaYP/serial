@@ -12,7 +12,7 @@ import (
 type Hub struct {
 	sync.RWMutex
 
-	room    string
+	port    string
 	clients map[*Client]bool
 
 	broadcast  chan *Message
@@ -22,8 +22,9 @@ type Hub struct {
 	messages []*Message
 }
 
-func NewHub() *Hub {
+func NewHub(port string) *Hub {
 	return &Hub{
+		port:       port,
 		clients:    map[*Client]bool{},
 		broadcast:  make(chan *Message),
 		register:   make(chan *Client),
@@ -46,8 +47,8 @@ func (h *Hub) run() {
 			h.clients[client] = true
 			h.Unlock()
 
-			log.Printf("client registered %s", client.id)
-
+			log.Printf("client registered %s %s", h.port, client.id)
+			client.send <- []byte(string("<div>" + h.port + "</div>"))
 			for _, msg := range h.messages {
 				client.send <- getMessageTemplate(msg)
 			}

@@ -44,6 +44,8 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalf("template execution: %s", err)
 		}
+	} else {
+		http.ServeFile(w, r, "templates/room.html")
 	}
 
 	log.Printf("url: %v", r.URL.String())
@@ -58,17 +60,21 @@ func main() {
 	if len(ports) == 0 {
 		log.Fatal("No serial ports found!")
 	}
+	hubs := make(map[string]*Hub)
 	for _, port := range ports {
 		fmt.Printf("Found port: %v\n", port)
+		hubs[port] = NewHub(port)
+		go hubs[port].run()
 	}
 	PORTS = ports
 
-	hub := NewHub()
-	go hub.run()
+	// hub := NewHub()
+	// go hub.run()
 
 	http.HandleFunc("/", serveIndex)
+	// http.HandleFunc("/cn", serveConnect)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
+		serveWs(hubs, w, r)
 	})
 
 	log.Fatal(http.ListenAndServe(":3001", nil))
