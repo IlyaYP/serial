@@ -17,15 +17,15 @@
 </head>
 
 <body>
-  <h1 class="text-3xl text-center p-4">Serial</h1>
-
-<div id="pd">
-  <select name="port" hx-get="/" hx-trigger="change" hx-target="#pd" class="bg-blue-500 text-white px-4 py-2">
+  <h1 class="text-3xl text-center p-4">Serial</h1>  
+  <div id="dp"></div>
+  <select name="port" hx-get="/" hx-trigger="change" hx-target="#dp"  class="bg-blue-500 text-white px-4 py-2">
+    <option value="" disabled selected>Select port</option>
     {{range .}}
     <option>{{.}}</option>
     {{end}}
   </select>
-</div>
+  
 </body>
 
 </html>

@@ -46,6 +46,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		http.ServeFile(w, r, "templates/room.html")
+		// http.ServeFile(w, r, "templates/index_old.html")
 	}
 
 	log.Printf("url: %v", r.URL.String())
@@ -60,6 +61,8 @@ func main() {
 	if len(ports) == 0 {
 		log.Fatal("No serial ports found!")
 	}
+
+	ports = []string{"COM1", "COM2", "COM3"} //tmp
 	hubs := make(map[string]*Hub)
 	for _, port := range ports {
 		fmt.Printf("Found port: %v\n", port)

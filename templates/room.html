@@ -1,14 +1,12 @@
-<div hx-ext="ws" ws-connect="/ws">
+<div hx-ws="connect:/ws">  
   <div class="flex bg-gray-100 p-4">
-    <!-- тут должен быть -->
-    <ul id="chat_room" hx-swap="beforeend" hx-swap-oob="beforeend">
+    <ul id="chat_room">
     </ul>
-    <!-- тут должен быть -->
   </div>
 
-<form id="form" ws-send hx-reset-on-success>
-  <input name="text" type="text" class="border-2 border-gray-300 p-2" placeholder="Type your message"
-    >
-  <button type="submit" class="bg-blue-500 text-white px-4 py-2">Send</button>
-</form>
+    <form hx-ws="send">
+    <!-- <input name="text" type="text" class="border-2 border-gray-300 p-2" placeholder="Type your message" -->
+    <input name="text" placeholder="Type your message" autofocus class="border-2 border-gray-300 p-2">
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2">Send</button>
+  </form>
 </div>
