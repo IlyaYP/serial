@@ -58,9 +58,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(ports) == 0 {
-		log.Fatal("No serial ports found!")
-	}
+	// if len(ports) == 0 {
+	// 	log.Fatal("No serial ports found!")
+	// }
 
 	ports = []string{"COM1", "COM2", "COM3"} //tmp
 	hubs := make(map[string]*Hub)
