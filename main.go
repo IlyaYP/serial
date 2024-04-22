@@ -63,10 +63,17 @@ func main() {
 	hubs := make(map[string]*Hub)
 	for _, port := range ports {
 		log.Printf("Found port: %v\n", port)
-		hubs[port] = newHub(port)
-		go hubs[port].run()
+		hub := newHub(port)
+		if hub != nil {
+			hubs[port] = hub
+			PORTS = append(PORTS, port)
+			go hubs[port].run()
+		}
 	}
-	PORTS = ports
+
+	if len(PORTS) == 0 {
+		log.Fatal("No free ports found!")
+	}
 
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,8 @@ package main
 import (
 	"log"
 	"sync"
+
+	"go.bug.st/serial"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -14,7 +16,9 @@ import (
 type Hub struct {
 	sync.RWMutex
 
-	// Registered clients.
+	hwPort serial.Port
+
+	// Port Name.
 	port string
 
 	// Registered clients.
@@ -31,7 +35,15 @@ type Hub struct {
 }
 
 func newHub(port string) *Hub {
+
+	hwPort, err := serial.Open(port, mode)
+	if err != nil {
+		log.Printf("can not open port %s %s", port, err)
+		return nil
+	}
+
 	return &Hub{
+		hwPort:     hwPort,
 		port:       port,
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
