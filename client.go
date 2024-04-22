@@ -133,8 +133,12 @@ func serveWs(hubs map[string]*Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("url: %v", r.URL.String())
+	port := r.URL.Query().Get("port")
+	if port == "" {
+		log.Println("empty port param")
+		return
+	}
 
-	port := "COM1" //tmp
 	id := uuid.New()
 	client := &Client{hub: hubs[port], port: port,
 		conn: conn, send: make(chan []byte, 256), id: id.String()}

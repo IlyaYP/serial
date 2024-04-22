@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"time"
@@ -34,17 +35,27 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	http.ServeFile(w, r, "home.html")
+	// http.ServeFile(w, r, "home.html")
+	tmpl, err := template.ParseFiles("home.html")
+	if err != nil {
+		log.Fatalf("template parsing: %s", err)
+	}
+
+	err = tmpl.Execute(w, PORTS)
+	if err != nil {
+		log.Fatalf("template execution: %s", err)
+	}
+
 }
 
 func main() {
 	flag.Parse()
 
-	ports := []string{"COM1", "COM2", "COM3"} //tmp
-	// ports, err := serial.GetPortsList()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	// ports := []string{"COM1", "COM2", "COM3"} //tmp
+	ports, err := serial.GetPortsList()
+	if err != nil {
+		log.Fatal(err)
+	}
 	if len(ports) == 0 {
 		log.Fatal("No serial ports found!")
 	}
@@ -57,8 +68,6 @@ func main() {
 	}
 	PORTS = ports
 
-	// hub := newHub()
-	// go hub.run()
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hubs, w, r)

@@ -22,7 +22,7 @@ window.onload = function () {
         if (conn) {
             conn.close(1000, "bye!");
         }
-        connectToPort();
+        connectToPort(port.value);
     };
 
     document.getElementById("form").onsubmit = function () {
@@ -41,9 +41,9 @@ window.onload = function () {
         return false;
     };
 
-    function connectToPort() {
+    function connectToPort(port) {
         if (window["WebSocket"]) {
-            conn = new WebSocket("ws://" + document.location.host + "/ws");
+            conn = new WebSocket("ws://" + document.location.host + "/ws?port="+port);
             conn.onclose = function (evt) {
                 var item = document.createElement("div");
                 item.innerHTML = "<b>Connection closed.</b>";
@@ -110,10 +110,10 @@ body {
     <input type="text" id="msg" size="64" autofocus />
     <select name="port" id="port">
         <option value="" disabled="" selected="">Select port</option>
-        <option>COM1</option>
-        <option>COM2</option>
-        <option>COM3</option>
-      </select>
+        {{range .}}
+        <option>{{.}}</option>
+        {{end}}
+    </select>
 </form>
 </body>
 </html>
