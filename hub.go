@@ -38,7 +38,7 @@ func newHub(port string) *Hub {
 
 	hwPort, err := serial.Open(port, mode)
 	if err != nil {
-		log.Printf("can not open port %s %s", port, err)
+		log.Printf("can not open port %s : %s", port, err)
 		return nil
 	}
 

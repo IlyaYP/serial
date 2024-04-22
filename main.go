@@ -67,7 +67,7 @@ func main() {
 		if hub != nil {
 			hubs[port] = hub
 			PORTS = append(PORTS, port)
-			go hubs[port].run()
+			go hub.run()
 		}
 	}
 
