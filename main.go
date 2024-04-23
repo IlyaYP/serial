@@ -63,11 +63,13 @@ func main() {
 	hubs := make(map[string]*Hub)
 	for _, port := range ports {
 		log.Printf("Found port: %v\n", port)
-		hub := newHub(port)
-		if hub != nil {
+		hub, err := newHub(port)
+		if err == nil {
 			hubs[port] = hub
 			PORTS = append(PORTS, port)
 			go hub.run()
+		} else {
+			log.Printf("%s\n", err)
 		}
 	}
 
