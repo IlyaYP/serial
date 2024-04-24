@@ -15,10 +15,10 @@ import (
 type Hub struct {
 	sync.RWMutex
 
-	hwPort *Port
+	port *Port
 
 	// Port Name.
-	port string
+	portName string
 
 	// Registered clients.
 	clients map[*Client]bool
@@ -33,35 +33,37 @@ type Hub struct {
 	unregister chan *Client
 }
 
-func newHub(port string) (*Hub, error) {
+func newHub(portName string) (*Hub, error) {
 
 	hub := &Hub{
-		port:       port,
+		portName:   portName,
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    map[*Client]bool{},
-		// clients:    make(map[*Client]bool),
 	}
 
 	Port, err := newPort(hub)
 	if err != nil {
-		return nil, fmt.Errorf("can not create hub for %s:%w", port, err)
+		return nil, fmt.Errorf("can not create hub for %s:%w", portName, err)
 	}
-	Port.hub = hub
-	go Port.readPump()
+
+	hub.port = Port
 
 	return hub, nil
 }
 
 func (h *Hub) run() {
+	go h.port.readPump()
+	go h.port.writePump()
+
 	for {
 		select {
 		case client := <-h.register:
 			h.Lock()
 			h.clients[client] = true
 			h.Unlock()
-			log.Printf("client registered %s %s", h.port, client.id)
+			log.Printf("client registered %s %s", h.portName, client.id)
 
 		case client := <-h.unregister:
 			h.Lock()
@@ -72,6 +74,7 @@ func (h *Hub) run() {
 			}
 			h.Unlock()
 		case message := <-h.broadcast:
+			// fmt.Printf("%s", string(message))
 			for client := range h.clients {
 				select {
 				case client.send <- message:

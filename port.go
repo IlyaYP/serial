@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 
@@ -19,17 +18,39 @@ type Port struct {
 }
 
 func newPort(hub *Hub) (*Port, error) {
-	port, err := serial.Open(hub.port, mode)
+	port, err := serial.Open(hub.portName, mode)
 	if err != nil {
-		return nil, fmt.Errorf("can not open port %s:%w", hub.port, err)
+		return nil, fmt.Errorf("can not open port %s:%w", hub.portName, err)
 	}
 
 	return &Port{
 		hub:  hub,
 		port: port,
-		name: hub.port,
+		name: hub.portName,
 		send: make(chan []byte, 256),
 	}, nil
+
+}
+
+func (p *Port) writePump() {
+	defer func() {
+		p.port.Close()
+	}()
+	for {
+		select {
+		case message, ok := <-p.send:
+			if !ok {
+				// The hub closed the channel.
+				return
+			}
+			// Send the string "10,20,30\n\r" to the serial port
+			n, err := p.port.Write(message)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Sent %v bytes\n", n)
+		}
+	}
 
 }
 
@@ -49,16 +70,12 @@ func (p *Port) readPump() {
 			fmt.Println("\nEOF")
 			break
 		}
+		// fmt.Printf("%s", string(buff[:n]))
 
-		fmt.Printf("%s", string(buff[:n]))
+		c := make([]byte, n)
+		copy(c, buff[:n])
 
-		// // If we receive a newline stop reading
-		// if strings.Contains(string(buff[:n]), "\n") {
-		// 	break
-		// }
-
-		buff = bytes.TrimSpace(bytes.Replace(buff, newline, space, -1))
-		p.hub.broadcast <- buff
+		p.hub.broadcast <- c
 
 	}
 }

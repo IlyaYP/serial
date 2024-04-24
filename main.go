@@ -17,7 +17,7 @@ import (
 var PORTS []string
 
 var mode = &serial.Mode{
-	BaudRate: 115200,
+	BaudRate: 9600,
 	Parity:   serial.EvenParity,
 	DataBits: 7,
 	StopBits: serial.OneStopBit,
@@ -64,13 +64,13 @@ func main() {
 	for _, port := range ports {
 		log.Printf("Found port: %v\n", port)
 		hub, err := newHub(port)
-		if err == nil {
-			hubs[port] = hub
-			PORTS = append(PORTS, port)
-			go hub.run()
-		} else {
+		if err != nil {
 			log.Printf("%s\n", err)
+			continue
 		}
+		hubs[port] = hub
+		PORTS = append(PORTS, port)
+		go hub.run()
 	}
 
 	if len(PORTS) == 0 {

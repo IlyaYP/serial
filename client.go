@@ -74,6 +74,7 @@ func (c *Client) readPump() {
 			}
 			break
 		}
+		c.hub.port.send <- message
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		c.hub.broadcast <- message
 	}
