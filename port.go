@@ -43,7 +43,7 @@ func (p *Port) writePump() {
 				// The hub closed the channel.
 				return
 			}
-			// Send the string "10,20,30\n\r" to the serial port
+			// message = append(message, "\n\r"...)
 			n, err := p.port.Write(message)
 			if err != nil {
 				log.Fatal(err)

@@ -11,7 +11,8 @@ window.onload = function () {
 
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
+        // log.appendChild(item);
+        log.append(item);
         if (doScroll) {
             log.scrollTop = log.scrollHeight - log.clientHeight;
         }
@@ -25,19 +26,24 @@ window.onload = function () {
         connectToPort(port.value);
     };
 
-    document.getElementById("form").onsubmit = function () {
-        console.log(port.value);
+    log.onkeydown  = function (e) {
+        // console.log(port.value);
+        // console.log(e.key);
+        // console.log(e.keyCode);
         if (!port.value) {
             return false;
         }
         if (!conn) {
             return false;
         }
-        if (!msg.value) {
+
+        if (e.keyCode == 13) {
+            // console.log(e.key);
+            conn.send("\n");
             return false;
         }
-        conn.send(msg.value);
-        msg.value = "";
+
+        conn.send(e.key);
         return false;
     };
 
@@ -50,13 +56,10 @@ window.onload = function () {
                 appendLog(item);
             };
             conn.onmessage = function (evt) {
-                var messages = evt.data.split('\n');
-                for (var i = 0; i < messages.length; i++) {
-                    var item = document.createElement("span");
-                    item.innerText = messages[i];
-                    appendLog(item);
-                    // appendLog(messages[i]);
+                if(evt.data == "\n") {
+                    log.innerHTML += '<br/>'
                 }
+                appendLog(evt.data)
             };
         } else {
             var item = document.createElement("div");
@@ -105,16 +108,16 @@ body {
 </style>
 </head>
 <body>
-<div id="log"></div>
-<form id="form">
+<div id="log" contenteditable="true"></div>
+<div id="form">
     <!-- <input type="submit" value="Send" /> -->
-    <input type="text" id="msg" size="64" autofocus />
+    <!-- <input type="text" id="msg" size="64" autofocus /> -->
     <select name="port" id="port">
         <option value="" disabled="" selected="">Select port</option>
         {{range .}}
         <option>{{.}}</option>
         {{end}}
     </select>
-</form>
+</div>
 </body>
 </html>
