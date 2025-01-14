@@ -16,6 +16,11 @@ import (
 
 var PORTS []string
 
+// mode defines the configuration for the serial communication.
+// BaudRate is set to 9600, which specifies the speed of communication.
+// Parity is set to EvenParity, which means an even number of bits with value 1 is maintained.
+// DataBits is set to 7, which means each character is 7 bits long.
+// StopBits is set to OneStopBit, which means one stop bit is used to indicate the end of a character.
 var mode = &serial.Mode{
 	BaudRate: 9600,
 	Parity:   serial.EvenParity,

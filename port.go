@@ -17,6 +17,8 @@ type Port struct {
 	hub *Hub
 }
 
+// newPort creates a new port and returns a pointer to it.
+// It returns an error if the port can not be opened.
 func newPort(hub *Hub) (*Port, error) {
 	port, err := serial.Open(hub.portName, mode)
 	if err != nil {
@@ -32,6 +34,9 @@ func newPort(hub *Hub) (*Port, error) {
 
 }
 
+// writePump sends messages to the port.
+// It closes the port when the channel is closed.
+// It sends messages to the port until the channel is closed.
 func (p *Port) writePump() {
 	defer func() {
 		p.port.Close()
@@ -54,6 +59,9 @@ func (p *Port) writePump() {
 
 }
 
+// readPump reads messages from the port.
+// It sends messages to the hub.
+// It closes the port when the channel is closed.
 func (p *Port) readPump() {
 	defer func() {
 		p.port.Close()
